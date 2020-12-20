@@ -7,10 +7,10 @@ ACore::ACore()
 
 string ACore::Query(const Sentence& question) const
 {
-	Node* node = Dict.find_MatchingSentence(question);
-	if (node != nullptr)
+	const Node* node = Dict.find_MatchingSentence(question);
+	if (node != nullptr && node->next != nullptr)
 	{
-		return node->s_data.getString();
+		return node->next->s_data.getString();
 	}
-	else return "";
+	else return "Not a valid sentence";
 }

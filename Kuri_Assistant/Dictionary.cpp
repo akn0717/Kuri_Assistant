@@ -1,92 +1,70 @@
 #pragma once
 #include "Dictionary.h"
 
-Sentence::Sentence() : keywords_ptr(nullptr), size(0) {}
+Sentence::Sentence() {}
 Sentence::Sentence(const string& s_raw) 
 {
 	string s = string_store_format(s_raw);
-	size = word_count(s);
-	keywords_ptr = new string[size];
-	copy_string2array(s, keywords_ptr);
+	copy_string2array(s, keywords);
 }
 
 Sentence::~Sentence()
 {
-	delete[] keywords_ptr;
-	keywords_ptr = nullptr;
-	size = 0;
 }
 
 Sentence& Sentence::operator=(const Sentence& s)
 {
 	if (this == &s) return *this;
-	this->size = s.size;
-	for (int i = 0; i < size; ++i) keywords_ptr[i] = s.keywords_ptr[i];
+	this->keywords = s.keywords;
 	return *this;
 }
 
 Sentence& Sentence::operator=(const string& s)
 {
-	string ss = string_store_format(s);
-	int ss_size = word_count(ss);
-	if (size!=0 && size!=ss_size)
-	{
-		this->~Sentence();
-		size = ss_size;
-		keywords_ptr = new string[ss_size];
-	}
-	int cnt = 0;
-	for (int i = 0; i < s.size(); ++i)
-	{
-		if (s[i] == ' ') ++cnt;
-		else keywords_ptr[cnt] += s[i];
-	}
+	*this = Sentence(string_store_format(s));
 	return *this;
 }
 
 string Sentence::getString() const
 {
 	string s;
-	for (int i = 0; i < size-1; ++i)
+	for (int i = 0; i < keywords.size()-1; ++i)
 	{
-		s += keywords_ptr[i] + ' ';
+		s += keywords[i] + ' ';
 	}
-	s += keywords_ptr[size - 1];
+	s += keywords[keywords.size() - 1];
 	return s;
 }
 
 int Sentence::getSize() const
 {
-	return size;
+	return keywords.size();
 }
 
 string Sentence::getWord(const int& index) const
 {
-	return keywords_ptr[index];
+	return keywords[index];
 }
 
 ifstream& operator>>(ifstream& fin, Sentence& s)
 {
-	string temp;
-	getline(fin, temp);
+	string temp = "";
+	while (temp== "") getline(fin, temp);
 	s = temp;
 	return fin;
 }
 
 //Dictionary Constructors
-Dictionary::Dictionary() : node_database(nullptr), size(0), max_size(2) 
+Dictionary::Dictionary() 
+{}
+Dictionary::Dictionary(const string& path)
 {
-	node_database = new Node[max_size];
-}
-Dictionary::Dictionary(const string& path) : size(0), max_size(2)
-{
-	node_database = new Node[max_size];
 	ifstream fin(path);
-	int m;
-	fin >> size;
+	int m,n;
+	fin >> n;
 	fin >> m;
 	Sentence temp;
-	for (int i = 0; i < size; ++i)
+	for (int i = 0; i < n; ++i)
 	{
 		fin >> temp;
 		add(temp);
@@ -94,32 +72,24 @@ Dictionary::Dictionary(const string& path) : size(0), max_size(2)
 	for (int u, v, i = 0; i < m; ++i)
 	{
 		fin >> u >> v;
-		node_database[u].next = &node_database[v];
+		list_node[u].next = &list_node[v];
 	}
 }
 
 
 Dictionary::~Dictionary()
 {
-	if (max_size > 0)
-	{
-		delete[] node_database;
-	}
-	node_database = nullptr;
-	max_size = 0;
-	size = 0;
 }
 
 void Dictionary::import(const string& path)
 {
-	size = 0;
 	ifstream fin;
 	fin.open(path);
-	int m;
-	fin >> size;
+	int m,n;
+	fin >> n;
 	fin >> m;
 	Sentence temp;
-	for (int i = 0; i < size; ++i)
+	for (int i = 0; i < n; ++i)
 	{
 		fin >> temp;
 		add(temp);
@@ -127,28 +97,20 @@ void Dictionary::import(const string& path)
 	for (int u, v, i = 0; i < m; ++i)
 	{
 		fin >> u >> v;
-		node_database[u].next = &node_database[v];
+		list_node[u].next = &list_node[v];
 	}
 }
 
 void Dictionary::add(const Sentence& s)
 {
-	if (max_size <= size)
-	{
-		max_size *= 2;
-		Node* new_nodelist = new Node[max_size];
-		for (int i = 0; i < size; ++i) new_nodelist[i] = node_database[i];
-		delete[] node_database;
-		node_database = new_nodelist;
-	}
-	node_database[size++] = Node(s);
+	list_node.push_back(Node(s));
 }
 
-Node* Dictionary::find_MatchingSentence(const Sentence& s) const
+const Node* Dictionary::find_MatchingSentence(const Sentence& s) const
 {
 	Word_Detector WD(s);
-	for (int i = 0; i < size; ++i)
-		if (WD.isMatching(node_database[i].s_data)) return &node_database[i];
+	for (int i = 0; i < list_node.size(); ++i)
+		if (WD.isMatching(list_node[i].s_data)) return &list_node[i];
 	return nullptr;
 }
 
@@ -156,25 +118,21 @@ Node* Dictionary::find_MatchingSentence(const Sentence& s) const
 
 Word_Detector::Word_Detector(const Sentence& s)
 {
-	size = s.getSize();
-	hash_f = new int[size];
-	for (int i = 0; i < size; ++i)
+	for (int i = 0; i < s.getSize(); ++i)
 	{
-		string Word = s.getWord(i);
-		hash_f[i] = hash(Word);
+		hash_f.push_back(hash(s.getWord(i)));
 	}
 
 }
 
 Word_Detector::~Word_Detector()
 {
-	delete[] hash_f;
 }
 
 bool Word_Detector::findWord(const string& s) const
 {
 	int hash_s = hash(s);
-	for (int i = 0; i < size; ++i)
+	for (int i = 0; i < hash_f.size(); ++i)
 	{
 		if (hash_f[i] == hash_s) return 1;
 	}

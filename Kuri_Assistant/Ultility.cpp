@@ -21,14 +21,19 @@ int word_count(const string& s)
 	return cnt + 1;
 }
 
-void copy_string2array(const string& s, string* sArray)
+void copy_string2array(const string& s, vector<string>& sArray)
 {
-	int arr_size = 0;
+	string temp = "";
 	for (int i = 0; i < s.size(); ++i)
 	{
-		if (s[i] == ' ') ++arr_size;
-		else sArray[arr_size] += s[i];
+		if (s[i] == ' ')
+		{
+			sArray.push_back(temp);
+			temp = "";
+		}
+		else temp += s[i];
 	}
+	sArray.push_back(temp);
 }
 
 int hash(const string& Word)

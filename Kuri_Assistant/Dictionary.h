@@ -1,18 +1,20 @@
 #pragma once
 #include <string>
 #include <fstream>
+#include <vector>
 
 #include "Ultility.h"
 
 using std::ifstream;
 using std::ostream;
 using std::string;
+using std::vector;
 
 class Sentence
 {
 public:
-	string* keywords_ptr;
-	int size;
+	vector<string> keywords;
+
 	Sentence();
 	Sentence(const string& s);
 
@@ -50,9 +52,7 @@ public:
 class Dictionary
 {
 private:
-	Node* node_database;
-	int size;
-	int max_size;
+	vector<Node> list_node;
 public:
 	Dictionary();
 	Dictionary(const string& path);
@@ -62,7 +62,7 @@ public:
 	void import(const string& path);
 	
 
-	Node* find_MatchingSentence(const Sentence& s) const;
+	const Node* find_MatchingSentence(const Sentence& s) const;
 	void add(const Sentence& s);
 	
 };
@@ -70,8 +70,7 @@ public:
 class Word_Detector
 {
 private:
-	int* hash_f;
-	int size;
+	vector<int> hash_f;
 public:
 	/*static int HP_Power[10];*/
 
