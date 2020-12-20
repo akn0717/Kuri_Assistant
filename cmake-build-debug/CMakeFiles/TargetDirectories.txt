@@ -1,0 +1,3 @@
+/home/ngot23/Documents/Kuri_Assistant/cmake-build-debug/CMakeFiles/rebuild_cache.dir
+/home/ngot23/Documents/Kuri_Assistant/cmake-build-debug/CMakeFiles/edit_cache.dir
+/home/ngot23/Documents/Kuri_Assistant/cmake-build-debug/CMakeFiles/Kuri_Assistant.dir
