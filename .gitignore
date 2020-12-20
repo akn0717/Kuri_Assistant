@@ -2,8 +2,26 @@
 /cmake-build-debug
 /.idea
 /CMakeLists.txt
+
+#Visual Studio
 /Kuri_Assistant.sln
 /Kuri_Assistant/Kuri_Assistant.vcxproj
 /Kuri_Assistant/Kuri_Assistant.vcxproj.filters
-/Kuri_Assistant/Kuri_Assistant.vcxproj.user
+
 /.vs
+*.suo
+*.user
+*.sln.docstates
+*.userosscache
+*.userprefs
+
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+x64/
+x86/
+bld/
+[Bb]in/
+[Oo]bj/
+[Ll]og/
