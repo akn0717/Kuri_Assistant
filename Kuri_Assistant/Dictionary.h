@@ -1,10 +1,13 @@
 #pragma once
 #include <string>
 #include <map>
-using std::string;
-using std::map;
 
-#define MAX_NUMBER_KEYWORD 100
+#include "Ultility.h"
+
+using std::string;
+using std::ifstream;
+using std::ofstream;
+using std::getline;
 
 class Sentence
 {
@@ -16,15 +19,15 @@ public:
 
 	~Sentence();
 
-	bool operator==(const string& s) const;
-
 	Sentence& operator=(const Sentence& s);
+	Sentence& operator=(const string& s);
 
 	string getString() const;
 	int getSize() const;
 
 	string getWord(const int& index) const;
 	
+	friend ifstream& operator>>(ifstream& fin, Sentence& s);
 
 };
 
@@ -34,27 +37,63 @@ public:
 	Sentence s_data;
 	Node* next;
 
+	Node() : next(nullptr) {}
 	Node(Sentence s) : s_data(s), next(nullptr) {}
 	Node(Sentence s, Node* node) : s_data(s), next(node) {}
+
+	void operator=(const Node& node)
+	{
+		s_data = node.s_data;
+		next = node.next;
+	}
 };
 
 class Dictionary
 {
 private:
-	map<string, Node*> dictionary_map;
 	Node* node_database;
 	int size;
+	int max_size;
 public:
 	Dictionary();
 	Dictionary(const string& path);
 
 	~Dictionary();
 
-	void import(const string& path);
-	void export(const string& path) const;
+	void import(const string& path)
+	{
+		size = 0;
+		ifstream fin;
+		fin.open(path);
+		int m;
+		fin >> size;
+		fin >> m;
+		Sentence temp;
+		for (int i = 0; i < size; ++i)
+		{
+			fin >> temp;
+			add(temp);
+		}
+		for (int u, v, i = 0; i < m; ++i)
+		{
+			fin >> u >> v;
+			node_database[u].next = &node_database[v];
+		}
+	}
 
 	Node* find_MatchingSentence(const Sentence& s) const;
-	
+	void add(const Sentence& s)
+	{
+		if (max_size <= size)
+		{
+			max_size *= 2;
+			Node* new_nodelist = new Node[max_size];
+			for (int i = 0; i < size; ++i) new_nodelist[i] = node_database[i];
+			delete[] node_database;
+			node_database = new_nodelist;
+		}
+		node_database[size++] = Node(s);
+	}
 };
 
 #define MAX_LENGTH_WORD 10

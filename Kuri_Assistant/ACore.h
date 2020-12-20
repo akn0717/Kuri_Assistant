@@ -3,7 +3,9 @@
 class ACore
 {
 private:
+	Dictionary Dict;
 public:
-	ACore() {}
+	ACore();
+	string Query(const Sentence& question) const;
 };
 
