@@ -1,6 +1,5 @@
+#pragma once
 #include "Dictionary.h"
-#include "Ultility.h"
-#include <fstream>
 
 Sentence::Sentence() : keywords_ptr(nullptr), size(0) {}
 Sentence::Sentence(const string& s_raw) 
@@ -111,10 +110,80 @@ Dictionary::~Dictionary()
 	size = 0;
 }
 
+void Dictionary::import(const string& path)
+{
+	size = 0;
+	ifstream fin;
+	fin.open(path);
+	int m;
+	fin >> size;
+	fin >> m;
+	Sentence temp;
+	for (int i = 0; i < size; ++i)
+	{
+		fin >> temp;
+		add(temp);
+	}
+	for (int u, v, i = 0; i < m; ++i)
+	{
+		fin >> u >> v;
+		node_database[u].next = &node_database[v];
+	}
+}
+
+void Dictionary::add(const Sentence& s)
+{
+	if (max_size <= size)
+	{
+		max_size *= 2;
+		Node* new_nodelist = new Node[max_size];
+		for (int i = 0; i < size; ++i) new_nodelist[i] = node_database[i];
+		delete[] node_database;
+		node_database = new_nodelist;
+	}
+	node_database[size++] = Node(s);
+}
+
 Node* Dictionary::find_MatchingSentence(const Sentence& s) const
 {
 	Word_Detector WD(s);
 	for (int i = 0; i < size; ++i)
 		if (WD.isMatching(node_database[i].s_data)) return &node_database[i];
 	return nullptr;
+}
+
+
+
+Word_Detector::Word_Detector(const Sentence& s)
+{
+	size = s.getSize();
+	hash_f = new int[size];
+	for (int i = 0; i < size; ++i)
+	{
+		string Word = s.getWord(i);
+		hash_f[i] = hash(Word);
+	}
+
+}
+
+Word_Detector::~Word_Detector()
+{
+	delete[] hash_f;
+}
+
+bool Word_Detector::findWord(const string& s) const
+{
+	int hash_s = hash(s);
+	for (int i = 0; i < size; ++i)
+	{
+		if (hash_f[i] == hash_s) return 1;
+	}
+	return 0;
+}
+
+bool Word_Detector::isMatching(const Sentence& s) const
+{
+	for (int i = 0; i < s.getSize(); ++i)
+		if (!findWord(s.getWord(i))) return 0;
+	return 1;
 }

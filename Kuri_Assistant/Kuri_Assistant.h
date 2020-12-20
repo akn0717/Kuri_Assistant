@@ -6,10 +6,7 @@ private:
 	ACore Kuri_Core;
 
 public:
-	Kuri_Assistant()
-	{
-
-	}
+	Kuri_Assistant();
 	string Query(const string& s) const;
 };
 
